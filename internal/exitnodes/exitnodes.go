@@ -37,18 +37,13 @@ func parse(lines []string) ([]ExitNode, error) {
 	nodes := make([]ExitNode, count)
 
 	for i := 0; i < count; i++ {
-		m := make(map[string]string, 1)
-
-		for l := i * 4; l < i*4+4; l++ {
-			kv := strings.SplitN(lines[l], " ", 2)
-			m[kv[0]] = kv[1]
-		}
+		ln := i * 4
 
 		nodes[i] = ExitNode{
-			Fingerprint: m["ExitNode"],
-			Published:   m["Published"],
-			LastStatus:  m["LastStatus"],
-			ExitAddress: m["ExitAddress"],
+			Fingerprint: strings.SplitN(lines[ln], " ", 2)[1],
+			Published:   strings.SplitN(lines[ln+1], " ", 2)[1],
+			LastStatus:  strings.SplitN(lines[ln+2], " ", 2)[1],
+			ExitAddress: strings.Split(lines[ln+3], " ")[1],
 		}
 	}
 

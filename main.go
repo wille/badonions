@@ -6,9 +6,27 @@ import (
 	"log"
 
 	"github.com/cretz/bine/tor"
+	example "github.com/wille/badonions/internal/example_test"
 	"github.com/wille/badonions/internal/exitnodes"
+	"github.com/wille/badonions/internal/nodetest"
 )
 
+var checks = make(map[string]nodetest.Test)
+
+func init() {
+	checks["example"] = example.ExampleTest{}
+}
+
+// Job is sent to a worker for processing
+type Job struct {
+	// ExitNode is the target exit node to check for malicious behavior
+	ExitNode exitnodes.ExitNode
+
+	// Test is the test suite this job will run
+	Test     nodetest.Test
+}
+
+// Result is either OK, errored or failed
 type Result struct {
 	job *Job
 }
@@ -24,14 +42,20 @@ func worker(id int, jobs <-chan *Job, results chan<- Result) {
 				job.ExitNode.Fingerprint,
 			},
 		})
-
 		if err != nil {
 			log.Fatalf("failed to start %s: %s", job.ExitNode, err.Error())
 		}
 
-		log.Printf("Worker %d using %s %s \n", id, job.ExitNode.Fingerprint, job.ExitNode.ExitAddress)
-		job.Run(t)
+		dialer, err := t.Dialer(nil, nil)
+
+		job.Test.Run(&nodetest.T{
+			DialContext: dialer.DialContext,
+			ExitNode: job.ExitNode,
+		})
+
+		log.Printf("Worker %d using %s %s\n", id, job.ExitNode.Fingerprint, job.ExitNode.ExitAddress)
 		t.Close()
+
 		results <- Result{job}
 	}
 }
@@ -58,6 +82,7 @@ func main() {
 	for _, exit := range exits {
 		jobs <- &Job{
 			ExitNode: exit,
+			Test: checks["example"],
 		}
 	}
 

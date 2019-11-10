@@ -34,7 +34,7 @@ func TestParse(t *testing.T) {
 		t.Errorf("mismatch on LastStatus")
 	}
 
-	if nodes[2].ExitAddress != "127.0.0.1 YYYY-mm-dd hh:mm:ss" {
+	if nodes[2].ExitAddress != "127.0.0.1" {
 		t.Errorf("mismatch on ExitAddress")
 	}
 
