@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
+	"runtime"
+
+	flags "github.com/jessevdk/go-flags"
 
 	"github.com/cretz/bine/tor"
 	example "github.com/wille/badonions/internal/example_test"
@@ -23,7 +27,7 @@ type Job struct {
 	ExitNode exitnodes.ExitNode
 
 	// Test is the test suite this job will run
-	Test     nodetest.Test
+	Test nodetest.Test
 }
 
 // Result is either OK, errored or failed
@@ -50,7 +54,7 @@ func worker(id int, jobs <-chan *Job, results chan<- Result) {
 
 		job.Test.Run(&nodetest.T{
 			DialContext: dialer.DialContext,
-			ExitNode: job.ExitNode,
+			ExitNode:    job.ExitNode,
 		})
 
 		log.Printf("Worker %d using %s %s\n", id, job.ExitNode.Fingerprint, job.ExitNode.ExitAddress)
@@ -60,29 +64,42 @@ func worker(id int, jobs <-chan *Job, results chan<- Result) {
 	}
 }
 
-const workers = 1
+var opts struct {
+	Workers   int      `short:"w" long:"workers" description:"Concurrent workers"`
+	TestNames []string `short:"t" long:"test" choice:"example" required:"true"`
+}
 
 func main() {
+	_, err := flags.Parse(&opts)
+	if err != nil {
+		os.Exit(-1)
+	}
+	if opts.Workers == 0 {
+		opts.Workers = runtime.NumCPU()
+	}
+
 	log.Println("Fetching active exit nodes")
 	exits, err := exitnodes.Get()
 	if err != nil {
 		log.Fatalf("Failed to list active exit nodes: %s", err.Error())
 	}
-	jobcount := len(exits)
+	jobcount := len(exits) * len(opts.TestNames)
 
-	log.Printf("Iterating %d exits with %d workers\n", jobcount, workers)
+	log.Printf("Iterating %d exits with %d workers\n", jobcount, opts.Workers)
 
 	jobs := make(chan *Job, jobcount)
 	results := make(chan Result, jobcount)
 
-	for i := 0; i < workers; i++ {
+	for i := 0; i < opts.Workers; i++ {
 		go worker(i, jobs, results)
 	}
 
-	for _, exit := range exits {
-		jobs <- &Job{
-			ExitNode: exit,
-			Test: checks["example"],
+	for _, name := range opts.TestNames {
+		for _, exit := range exits {
+			jobs <- &Job{
+				ExitNode: exit,
+				Test:     checks[name],
+			}
 		}
 	}
 
