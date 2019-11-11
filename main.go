@@ -10,6 +10,7 @@ import (
 	flags "github.com/jessevdk/go-flags"
 
 	"github.com/cretz/bine/tor"
+	"github.com/wille/badonions/internal/checkbin"
 	example "github.com/wille/badonions/internal/example_test"
 	"github.com/wille/badonions/internal/exitnodes"
 	"github.com/wille/badonions/internal/nodetest"
@@ -19,6 +20,7 @@ var checks = make(map[string]nodetest.Test)
 
 func init() {
 	checks["example"] = example.ExampleTest{}
+	checks["http"] = checkbin.HTTPExecutableCheck{}
 }
 
 // Job is sent to a worker for processing
@@ -51,13 +53,17 @@ func worker(id int, jobs <-chan *Job, results chan<- Result) {
 		}
 
 		dialer, err := t.Dialer(nil, nil)
+		if err != nil {
+			panic(err)
+		}
 
-		job.Test.Run(&nodetest.T{
+		log.Printf("Worker %d using %s %s\n", id, job.ExitNode.Fingerprint, job.ExitNode.ExitAddress)
+		err = job.Test.Run(&nodetest.T{
 			DialContext: dialer.DialContext,
 			ExitNode:    job.ExitNode,
 		})
+		log.Printf("%d: %s\n", id, err.Error())
 
-		log.Printf("Worker %d using %s %s\n", id, job.ExitNode.Fingerprint, job.ExitNode.ExitAddress)
 		t.Close()
 
 		results <- Result{job}
