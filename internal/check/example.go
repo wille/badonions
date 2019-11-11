@@ -1,4 +1,4 @@
-package example
+package check
 
 import (
 	"io/ioutil"

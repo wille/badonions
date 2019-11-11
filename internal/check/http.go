@@ -1,4 +1,4 @@
-package checkbin
+package check
 
 import (
 	"crypto/sha1"

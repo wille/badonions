@@ -10,8 +10,7 @@ import (
 	flags "github.com/jessevdk/go-flags"
 
 	"github.com/cretz/bine/tor"
-	"github.com/wille/badonions/internal/checkbin"
-	example "github.com/wille/badonions/internal/example_test"
+	"github.com/wille/badonions/internal/check"
 	"github.com/wille/badonions/internal/exitnodes"
 	"github.com/wille/badonions/internal/nodetest"
 )
@@ -19,8 +18,8 @@ import (
 var checks = make(map[string]nodetest.Test)
 
 func init() {
-	checks["example"] = example.ExampleTest{}
-	checks["http"] = checkbin.HTTPExecutableCheck{}
+	checks["example"] = check.ExampleTest{}
+	checks["http"] = check.HTTPExecutableCheck{}
 }
 
 // Job is sent to a worker for processing
@@ -72,7 +71,7 @@ func worker(id int, jobs <-chan *Job, results chan<- Result) {
 
 var opts struct {
 	Workers   int      `short:"w" long:"workers" description:"Concurrent workers"`
-	TestNames []string `short:"t" long:"test" choice:"example" required:"true"`
+	TestNames []string `short:"t" long:"test" choice:"example" choice:"ftp" choice:"http" required:"true"`
 }
 
 func main() {
