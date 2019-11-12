@@ -100,6 +100,15 @@ func main() {
 	}
 
 	for _, name := range opts.TestNames {
+		check := checks[name]
+		err := check.Init()
+
+		if err != nil {
+			log.Fatalf("Failed to initialize %s: %s\n", name, err.Error())
+		}
+	}
+
+	for _, name := range opts.TestNames {
 		for _, exit := range exits {
 			jobs <- &Job{
 				ExitNode: exit,

@@ -8,6 +8,7 @@ import (
 )
 
 type Test interface {
+	Init() error
 	Run(*T) error
 }
 

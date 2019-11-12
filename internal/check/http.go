@@ -19,6 +19,10 @@ type HTTPExecutableCheck struct {
 	Sum string
 }
 
+func (e HTTPExecutableCheck) Init() error {
+	return nil
+}
+
 func (e HTTPExecutableCheck) Run(t *nodetest.T) error {
 	transport := &http.Transport{
 		DialContext: t.DialContext,
