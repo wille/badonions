@@ -15,8 +15,8 @@ import (
 	"github.com/wille/badonions/internal/nodetest"
 )
 
-// HTTPFileCheck downloads a file from a web server over HTTP or HTTPS without verifying the cert
-// It checks the result with the provided file checksum
+// HTTPFileCheck verifies the integrity of resources downloaded from a remote HTTP server
+// It detects tampered SSL/TLS certificates as well
 type HTTPFileCheck struct {
 	// URL is the remote url of the file to download through each node
 	URL string
