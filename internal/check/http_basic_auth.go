@@ -15,11 +15,11 @@ type HTTPBasicAuthCheck struct {
 	URL string
 }
 
-func (e HTTPBasicAuthCheck) Init() error {
+func (e *HTTPBasicAuthCheck) Init() error {
 	return nil
 }
 
-func (e HTTPBasicAuthCheck) Run(t *nodetest.T) error {
+func (e *HTTPBasicAuthCheck) Run(t *nodetest.T) error {
 	transport := &http.Transport{
 		DialContext: t.DialContext,
 	}
@@ -50,7 +50,7 @@ func (e HTTPBasicAuthCheck) Run(t *nodetest.T) error {
 	return nil
 }
 
-func storeFingerprintCredentials(e HTTPBasicAuthCheck, exit exitnodes.ExitNode, user, pass string) {
+func storeFingerprintCredentials(e *HTTPBasicAuthCheck, exit exitnodes.ExitNode, user, pass string) {
 	log.Printf("%s: %s:%s\t\t%s", exit.Fingerprint, user, pass, e.URL)
 }
 

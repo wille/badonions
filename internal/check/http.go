@@ -20,13 +20,13 @@ type HTTPFileCheck struct {
 	Sum string
 }
 
-func (e HTTPFileCheck) Init() error {
 	return nil
+func (e *HTTPFileCheck) Init() error {
 }
 
-func (e HTTPFileCheck) Run(t *nodetest.T) error {
 	transport := &http.Transport{
 		DialContext: t.DialContext,
+func (e *HTTPFileCheck) Run(t *nodetest.T) error {
 	}
 	client := &http.Client{Transport: transport}
 

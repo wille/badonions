@@ -10,11 +10,11 @@ import (
 
 type ExampleTest struct{}
 
-func (ExampleTest) Init() error {
+func (*ExampleTest) Init() error {
 	return nil
 }
 
-func (e ExampleTest) Run(t *nodetest.T) error {
+func (e *ExampleTest) Run(t *nodetest.T) error {
 	transport := &http.Transport{
 		DialContext: t.DialContext,
 	}

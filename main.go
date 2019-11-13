@@ -18,11 +18,11 @@ import (
 var checks = make(map[string]nodetest.Test)
 
 func init() {
-	checks["example"] = check.ExampleTest{}
-	checks["http-file"] = check.HTTPFileCheck{
-		URL: "https://jigsaw.w3.org/HTTP/Basic/",
+	checks["example"] = &check.ExampleTest{}
+	checks["http-file"] = &check.HTTPFileCheck{
+		URL: "https://jigsaw.w3.org/icons/jigsaw",
 	}
-	checks["http-basic-auth"] = check.HTTPBasicAuthCheck{
+	checks["http-basic-auth"] = &check.HTTPBasicAuthCheck{
 		URL: "https://jigsaw.w3.org/HTTP/Basic/",
 	}
 }
