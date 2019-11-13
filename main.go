@@ -20,6 +20,9 @@ var checks = make(map[string]nodetest.Test)
 func init() {
 	checks["example"] = check.ExampleTest{}
 	checks["http"] = check.HTTPExecutableCheck{}
+	checks["http-basic-auth"] = check.HTTPBasicAuthCheck{
+		URL: "https://jigsaw.w3.org/HTTP/Basic/",
+	}
 }
 
 // Job is sent to a worker for processing
@@ -71,7 +74,7 @@ func worker(id int, jobs <-chan *Job, results chan<- Result) {
 
 var opts struct {
 	Workers   int      `short:"w" long:"workers" description:"Concurrent workers"`
-	TestNames []string `short:"t" long:"test" choice:"example" choice:"ftp" choice:"http" required:"true"`
+	TestNames []string `short:"t" long:"test" choice:"example" choice:"http-basic-auth" choice:"http" required:"true"`
 }
 
 func main() {

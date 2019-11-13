@@ -26,6 +26,11 @@ func main() {
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		w.WriteHeader(405)
+		return
+	}
+
 	user, pass, ok := r.BasicAuth()
 	if !ok {
 		unauthorized(w, "Admin Panel")
