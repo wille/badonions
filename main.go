@@ -20,6 +20,7 @@ var checks = make(map[string]nodetest.Test)
 func init() {
 	checks["example"] = &check.ExampleTest{}
 	checks["http-file"] = &check.HTTPFileCheck{
+		// Good URL because some exit nodes are getting rejected by it
 		URL: "https://jigsaw.w3.org/icons/jigsaw",
 	}
 	checks["http-basic-auth"] = &check.HTTPBasicAuthCheck{
