@@ -1,9 +1,12 @@
 package check
 
 import (
+	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 
+	"github.com/wille/badonions/internal/exitnodes"
 	"github.com/wille/badonions/internal/nodetest"
 )
 
@@ -22,13 +25,15 @@ func (e HTTPBasicAuthCheck) Run(t *nodetest.T) error {
 	}
 	client := &http.Client{Transport: transport}
 
-	req, err := http.NewRequest("POST", e.URL, nil)
+	req, err := http.NewRequest("GET", e.URL, nil)
 	if err != nil {
 		return err
 	}
 
-	user := "admin1"
-	pass := randomString(8)
+	user := "guest"
+	pass := "guest"
+
+	storeFingerprintCredentials(e, t.ExitNode, user, pass)
 
 	req.SetBasicAuth(user, pass)
 
@@ -38,7 +43,15 @@ func (e HTTPBasicAuthCheck) Run(t *nodetest.T) error {
 	}
 	defer resp.Body.Close()
 
-	return err
+	if resp.StatusCode != 200 {
+		t.Fail(fmt.Errorf("Failed to login with provided credentials, HTTP %s", resp.Status))
+	}
+
+	return nil
+}
+
+func storeFingerprintCredentials(e HTTPBasicAuthCheck, exit exitnodes.ExitNode, user, pass string) {
+	log.Printf("%s: %s:%s\t\t%s", exit.Fingerprint, user, pass, e.URL)
 }
 
 func randomString(length int) string {

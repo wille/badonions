@@ -1,6 +1,7 @@
 package check
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -26,7 +27,7 @@ func (e ExampleTest) Run(t *nodetest.T) error {
 	ip := string(data)
 
 	if ip != t.ExitNode.ExitAddress {
-		t.Fail()
+		t.Fail(fmt.Errorf("ExitAddress mismatch: expected %s, got %s", t.ExitNode.ExitAddress, ip))
 		return nil
 	}
 

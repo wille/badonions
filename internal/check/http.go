@@ -3,6 +3,7 @@ package check
 import (
 	"crypto/sha1"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -11,7 +12,7 @@ import (
 
 // HTTPExecutableCheck downloads a file from a web server over HTTP or HTTPS without verifying the cert
 // It checks the result with the provided file checksum
-type HTTPExecutableCheck struct {
+type HTTPFileCheck struct {
 	// URL is the remote url of the file to download through each node
 	URL string
 
@@ -19,11 +20,11 @@ type HTTPExecutableCheck struct {
 	Sum string
 }
 
-func (e HTTPExecutableCheck) Init() error {
+func (e HTTPFileCheck) Init() error {
 	return nil
 }
 
-func (e HTTPExecutableCheck) Run(t *nodetest.T) error {
+func (e HTTPFileCheck) Run(t *nodetest.T) error {
 	transport := &http.Transport{
 		DialContext: t.DialContext,
 	}
@@ -44,7 +45,7 @@ func (e HTTPExecutableCheck) Run(t *nodetest.T) error {
 	sum := hex.EncodeToString(h.Sum(nil))
 
 	if sum != e.Sum {
-		t.Fail()
+		t.Fail(fmt.Errorf("File sum mismatch, expected %s, got %s", e.Sum, sum))
 		return nil
 	}
 

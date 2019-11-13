@@ -19,7 +19,9 @@ var checks = make(map[string]nodetest.Test)
 
 func init() {
 	checks["example"] = check.ExampleTest{}
-	checks["http"] = check.HTTPExecutableCheck{}
+	checks["http-file"] = check.HTTPFileCheck{
+		URL: "https://jigsaw.w3.org/HTTP/Basic/",
+	}
 	checks["http-basic-auth"] = check.HTTPBasicAuthCheck{
 		URL: "https://jigsaw.w3.org/HTTP/Basic/",
 	}
@@ -64,7 +66,9 @@ func worker(id int, jobs <-chan *Job, results chan<- Result) {
 			DialContext: dialer.DialContext,
 			ExitNode:    job.ExitNode,
 		})
-		log.Printf("%d: %s\n", id, err.Error())
+		if err != nil {
+			log.Printf("%d: %s\n", id, err.Error())
+		}
 
 		t.Close()
 
@@ -74,7 +78,7 @@ func worker(id int, jobs <-chan *Job, results chan<- Result) {
 
 var opts struct {
 	Workers   int      `short:"w" long:"workers" description:"Concurrent workers"`
-	TestNames []string `short:"t" long:"test" choice:"example" choice:"http-basic-auth" choice:"http" required:"true"`
+	TestNames []string `short:"t" long:"test" choice:"example" choice:"http-basic-auth" choice:"http-file" required:"true"`
 }
 
 func main() {
