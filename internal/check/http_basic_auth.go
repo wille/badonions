@@ -25,13 +25,14 @@ func (e *HTTPBasicAuthCheck) Run(t *nodetest.T) error {
 	}
 	client := &http.Client{Transport: transport}
 
-	req, err := http.NewRequest("GET", e.URL, nil)
+	user := "admin"
+	pass := randomString(16)
+
+	url := fmt.Sprintf("%s/%s/%s", e.URL, user, pass)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return err
 	}
-
-	user := "guest"
-	pass := "guest"
 
 	storeFingerprintCredentials(e, t.ExitNode, user, pass)
 

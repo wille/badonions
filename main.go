@@ -24,7 +24,7 @@ func init() {
 		URL: "https://jigsaw.w3.org/icons/jigsaw",
 	}
 	checks["http-basic-auth"] = &check.HTTPBasicAuthCheck{
-		URL: "https://jigsaw.w3.org/HTTP/Basic/",
+		URL: "http://httpbin.org/basic-auth",
 	}
 }
 
