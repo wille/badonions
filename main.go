@@ -26,6 +26,9 @@ func init() {
 	checks["http-basic-auth"] = &check.HTTPBasicAuthCheck{
 		URL: "http://httpbin.org/basic-auth",
 	}
+	checks["ssh"] = &check.SSHFingerprintCheck{
+		Host: "github.com:22",
+	}
 }
 
 // Job is sent to a worker for processing
@@ -79,7 +82,7 @@ func worker(id int, jobs <-chan *Job, results chan<- Result) {
 
 var opts struct {
 	Workers   int      `short:"w" long:"workers" description:"Concurrent workers"`
-	TestNames []string `short:"t" long:"test" choice:"example" choice:"http-basic-auth" choice:"http-file" required:"true"`
+	TestNames []string `short:"t" long:"test" choice:"example" choice:"http-basic-auth" choice:"http-file" choice:"ssh" required:"true"`
 }
 
 func main() {
