@@ -15,23 +15,20 @@ type SSHFingerprintCheck struct {
 	publicKey ssh.PublicKey
 }
 
+// Init connects to the host and stores the public key fingerprint
 func (e *SSHFingerprintCheck) Init() error {
 	config := &ssh.ClientConfig{
-		User: "git",
-		Auth: []ssh.AuthMethod{
-			ssh.Password("test"),
-		},
 		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
-			fmt.Println("HostKeyCallback", hostname, remote, key.Type(), ssh.FingerprintSHA256(key))
+			log.Printf("%s host key %s\n", remote.String(), ssh.FingerprintSHA256(key))
 			e.publicKey = key
 			return nil
 		},
 	}
 
-	_, err := ssh.Dial("tcp", e.Host, config)
+	ssh.Dial("tcp", e.Host, config)
 
-	if err != nil {
-		log.Printf("WARN: ssh init failed: %s\n", err.Error())
+	if e.publicKey == nil {
+		return fmt.Errorf("Could not get host key for %s", e.Host)
 	}
 
 	return nil
@@ -39,29 +36,31 @@ func (e *SSHFingerprintCheck) Init() error {
 
 func (e *SSHFingerprintCheck) Run(t *nodetest.T) error {
 	config := &ssh.ClientConfig{
-		User: "git",
-		Auth: []ssh.AuthMethod{
-			ssh.Password("test"),
-		},
 		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
-			fmt.Println("HostKeyCallback", hostname, remote, key.Type(), ssh.FingerprintSHA256(key))
-			e.publicKey = key
+			fp := ssh.FingerprintSHA256(key)
+			if fp != ssh.FingerprintSHA256(e.publicKey) {
+				t.Fail(fmt.Errorf("Fingerprint mismatch! %s", fp))
+			}
 			return nil
 		},
 	}
 
 	conn, err := t.Dial("tcp", e.Host)
-	c, chans, reqs, err := ssh.NewClientConn(conn, e.Host, config)
+
+	// failed to etablish connection
 	if err != nil {
-		conn.Close()
 		return err
 	}
-	client := ssh.NewClient(c, chans, reqs)
-	sess, _ := client.NewSession()
-	sess.Run("ls")
-	sess.Close()
-	client.Close()
-	conn.Close()
+	defer conn.Close()
+
+	c, _, _, err := ssh.NewClientConn(conn, e.Host, config)
+
+	// failed to authenticate
+	// this is ok if we don't want to keep the connection open
+	if err != nil {
+		return nil
+	}
+	c.Close()
 
 	return err
 }
