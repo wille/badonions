@@ -31,20 +31,24 @@ func Get() ([]ExitNode, error) {
 	return parse(lines)
 }
 
+// parse does not handle cases with multiple ExitAddress
 func parse(lines []string) ([]ExitNode, error) {
-	count := len(lines) / 4
+	nodes := make([]ExitNode, 0)
 
-	nodes := make([]ExitNode, count)
+	for i := 0; i+1 < len(lines); {
+		j := i + 1
 
-	for i := 0; i < count; i++ {
-		ln := i * 4
-
-		nodes[i] = ExitNode{
-			Fingerprint: strings.SplitN(lines[ln], " ", 2)[1],
-			Published:   strings.SplitN(lines[ln+1], " ", 2)[1],
-			LastStatus:  strings.SplitN(lines[ln+2], " ", 2)[1],
-			ExitAddress: strings.Split(lines[ln+3], " ")[1],
+		for ; j < len(lines) && strings.Split(lines[j], " ")[0] != "ExitNode"; j++ {
 		}
+
+		nodes = append(nodes, ExitNode{
+			Fingerprint: strings.SplitN(lines[i], " ", 2)[1],
+			Published:   strings.SplitN(lines[i+1], " ", 2)[1],
+			LastStatus:  strings.SplitN(lines[i+2], " ", 2)[1],
+			ExitAddress: strings.Split(lines[i+3], " ")[1],
+		})
+
+		i = j
 	}
 
 	return nodes, nil

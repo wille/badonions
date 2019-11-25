@@ -20,6 +20,18 @@ func TestParse(t *testing.T) {
 		"Published YYYY-mm-dd hh:mm:ss",
 		"LastStatus YYYY-mm-dd hh:mm:ss",
 		"ExitAddress 127.0.0.1 YYYY-mm-dd hh:mm:ss",
+
+		"ExitNode 4",
+		"Published YYYY-mm-dd hh:mm:ss",
+		"LastStatus YYYY-mm-dd hh:mm:ss",
+		"ExitAddress 1",
+		"ExitAddress 2",
+		"ExitAddress 3",
+
+		"ExitNode 5",
+		"Published YYYY-mm-dd hh:mm:ss",
+		"LastStatus YYYY-mm-dd hh:mm:ss",
+		"ExitAddress 127.0.0.1 YYYY-mm-dd hh:mm:ss",
 	})
 
 	if nodes[0].Fingerprint != "AABBCCDDEEFF" {
