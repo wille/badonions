@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"runtime"
+	"time"
 
 	flags "github.com/jessevdk/go-flags"
 
@@ -60,9 +62,17 @@ func worker(id int, jobs <-chan *Job, results chan<- Result) {
 			log.Fatalf("failed to start %s: %s", job.ExitNode, err.Error())
 		}
 
-		dialer, err := t.Dialer(nil, nil)
+		timeout, cancel := context.WithTimeout(context.Background(), time.Second*15)
+		defer cancel()
+		dialer, err := t.Dialer(timeout, nil)
 		if err != nil {
-			panic(err)
+			t.Close()
+			if err == context.DeadlineExceeded {
+				log.Printf("Worker %d: timeout while etablishing circuit to %s\n", id, job.ExitNode.Fingerprint)
+			} else {
+				log.Printf("Worker %d: init: %s\n", id, err.Error())
+			}
+			continue
 		}
 
 		log.Printf("Worker %d using %s %s\n", id, job.ExitNode.Fingerprint, job.ExitNode.ExitAddress)
@@ -71,7 +81,11 @@ func worker(id int, jobs <-chan *Job, results chan<- Result) {
 			ExitNode:    job.ExitNode,
 		})
 		if err != nil {
-			log.Printf("%d: %s\n", id, err.Error())
+			if err == context.DeadlineExceeded {
+				log.Printf("Worker %d: timeout while connecting\n", id)
+			} else {
+				log.Printf("Worker %d: run: %s\n", id, err.Error())
+			}
 		}
 
 		t.Close()

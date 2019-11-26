@@ -1,9 +1,11 @@
 package check
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
+	"time"
 
 	"github.com/wille/badonions/internal/nodetest"
 	"golang.org/x/crypto/ssh"
@@ -45,7 +47,9 @@ func (e *SSHFingerprintCheck) Run(t *nodetest.T) error {
 		},
 	}
 
-	conn, err := t.Dial("tcp", e.Host)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+	defer cancel()
+	conn, err := t.DialContext(ctx, "tcp", e.Host)
 
 	// failed to etablish connection
 	if err != nil {
